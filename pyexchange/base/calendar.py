@@ -21,9 +21,10 @@ RESPONSES = [RESPONSE_ACCEPTED, RESPONSE_DECLINED, RESPONSE_TENTATIVE, RESPONSE_
 
 class BaseExchangeCalendarService(object):
 
-  def __init__(self, service, calendar_id):
+  def __init__(self, service, calendar_id, mailbox=None):
     self.service = service
     self.calendar_id = calendar_id
+    self.mailbox=mailbox
 
   def event(self, id, *args, **kwargs):
     raise NotImplementedError

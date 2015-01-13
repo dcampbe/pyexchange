@@ -135,6 +135,28 @@ def get_calendar_items(format=u"Default", start=None, end=None, max_entries=9999
 
   return root
 
+def get_calendar_items_from_mailbox(mailbox_name, format=u"Default", start=None, end=None, max_entries=999999):
+  start = start.strftime(EXCHANGE_DATETIME_FORMAT)
+  end = end.strftime(EXCHANGE_DATETIME_FORMAT)
+
+  root = M.FindItem(
+    {u'Traversal': u'Shallow'},
+    M.ItemShape(
+      T.BaseShape(format)
+    ),
+    M.CalendarView({
+      u'MaxEntriesReturned': _unicode(max_entries),
+      u'StartDate': start,
+      u'EndDate': end,
+    }),
+    M.ParentFolderIds(
+        T.DistinguishedFolderId({u'Id':u'calendar'},
+            T.Mailbox(
+                T.EmailAddress(mailbox_name))))
+  )
+
+  return root
+
 
 def get_master(exchange_id, format=u"Default"):
   """

@@ -24,8 +24,8 @@ log = logging.getLogger("pyexchange")
 
 class Exchange2010Service(ExchangeServiceSOAP):
 
-  def calendar(self, id="calendar"):
-    return Exchange2010CalendarService(service=self, calendar_id=id)
+  def calendar(self, id="calendar", mailbox=None):
+    return Exchange2010CalendarService(service=self, calendar_id=id, mailbox=mailbox)
 
   def mail(self):
     raise NotImplementedError("Sorry - nothin' here. Feel like adding it? :)")
@@ -92,15 +92,16 @@ class Exchange2010CalendarService(BaseExchangeCalendarService):
     return Exchange2010CalendarEvent(service=self.service, calendar_id=self.calendar_id, **properties)
 
   def list_events(self, start=None, end=None, details=False):
-    return Exchange2010CalendarEventList(service=self.service, start=start, end=end, details=details)
+    return Exchange2010CalendarEventList(service=self.service, start=start, end=end, details=details, mailbox=self.mailbox)
 
 
 class Exchange2010CalendarEventList(object):
   """
   Creates & Stores a list of Exchange2010CalendarEvent items in the "self.events" variable.
   """
-  def __init__(self, service=None, start=None, end=None, details=False):
+  def __init__(self, service=None, mailbox=None, start=None, end=None, details=False):
     self.service = service
+    self.mailbox = mailbox
     self.count = 0
     self.start = start
     self.end = end
@@ -109,7 +110,14 @@ class Exchange2010CalendarEventList(object):
     self.details = details
 
     # This request uses a Calendar-specific query between two dates.
-    body = soap_request.get_calendar_items(format=u'AllProperties', start=self.start, end=self.end)
+    if self.mailbox:
+        print 'Getting calendar items from mailbox = ' + self.mailbox
+        body = soap_request.get_calendar_items_from_mailbox(self.mailbox, format=u'AllProperties', start=self.start, end=self.end)
+        print '####DEBUG####\n' + etree.tostring(body, encoding="utf-8", pretty_print=True)
+    else:
+        print 'Getting calendar items from personal mailbox'
+        body = soap_request.get_calendar_items(format=u'AllProperties', start=self.start, end=self.end)
+
     response_xml = self.service.send(body)
     self._parse_response_for_all_events(response_xml)
 
