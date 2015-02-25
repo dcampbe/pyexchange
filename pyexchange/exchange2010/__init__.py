@@ -111,11 +111,8 @@ class Exchange2010CalendarEventList(object):
 
     # This request uses a Calendar-specific query between two dates.
     if self.mailbox:
-        print 'Getting calendar items from mailbox = ' + self.mailbox
         body = soap_request.get_calendar_items_from_mailbox(self.mailbox, format=u'AllProperties', start=self.start, end=self.end)
-        print '####DEBUG####\n' + etree.tostring(body, encoding="utf-8", pretty_print=True)
     else:
-        print 'Getting calendar items from personal mailbox'
         body = soap_request.get_calendar_items(format=u'AllProperties', start=self.start, end=self.end)
 
     response_xml = self.service.send(body)
